@@ -26,4 +26,15 @@ public class FallbackController {
         ));
     }
 
+    @GetMapping(value = "/drones", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
+    public Mono<Map<String, Object>> dronesFallback() {
+        return Mono.just(Map.of(
+                "error", "Service Unavailable",
+                "service", "Resource Service",
+                "message", "El servicio de resource no está disponible temporalmente",
+                "timestamp", Instant.now().toString()
+        ));
+    }
+
 }
