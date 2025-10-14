@@ -5,6 +5,15 @@ spring:
   application:
     name: umas-gateway-service
 
+  data:
+    redis:
+      client-type: lettuce
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      # Si usas password:
+      # password: ${SPRING_REDIS_PASSWORD:}
+      timeout: 5s
+
   cloud:
     gateway:
       server:
@@ -28,7 +37,7 @@ spring:
 
           routes:
             - id: geoevent-all
-              uri: http://localhost:8084
+              uri: ${GEOEVENT_SERVICE}
               predicates:
                 - Path=/api/v1/geofences
                 - Method=GET
@@ -50,7 +59,7 @@ spring:
                 - AddResponseHeader=X-Gateway-Response, UMAS-Gateway
 
             - id: geoevent-by-id
-              uri: http://localhost:8084
+              uri: ${GEOEVENT_SERVICE}
               predicates:
                 - Path=/api/v1/geofences/{id}
                 - Method=GET
@@ -62,7 +71,7 @@ spring:
                 - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
 
             - id: geoevent-geojson
-              uri: http://localhost:8084
+              uri: ${GEOEVENT_SERVICE}
               predicates:
                 - Path=/api/v1/geofences/{id}/geojson
                 - Method=GET
@@ -74,7 +83,7 @@ spring:
                 - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
 
             - id: geoevent-check
-              uri: http://localhost:8084
+              uri: ${GEOEVENT_SERVICE}
               predicates:
                 - Path=/api/v1/geofences/check
                 - Method=GET
