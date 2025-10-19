@@ -28,16 +28,50 @@ spring:
                 maxAge: 3600
 
           routes:
+            - id: geofence-types-all
+              uri: ${GEOFENCE_SERVICE}
+              predicates:
+                - Path=/api/v1/geofence-types
+                - Method=GET
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: geoFenceCircuitBreaker
+                    fallbackUri: forward:/fallback/geofences
+                - name: Retry
+                  args:
+                    retries: 2
+                    statuses: BAD_GATEWAY,SERVICE_UNAVAILABLE
+                    backoff:
+                      firstBackoff: 100ms
+                      maxBackoff: 1000ms
+                      factor: 2
+                      basedOnPreviousValue: true
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+                - AddResponseHeader=X-Gateway-Response, UMAS-Gateway
+
+            - id: geofence-types-by-id
+              uri: ${GEOFENCE_SERVICE}
+              predicates:
+                - Path=/api/v1/geofence-types/{id}
+                - Method=GET
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: geoFenceCircuitBreaker
+                    fallbackUri: forward:/fallback/geofences
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+
             - id: geoevent-all
-              uri: ${GEOEVENT_SERVICE}
+              uri: ${GEOFENCE_SERVICE}
               predicates:
                 - Path=/api/v1/geofences
                 - Method=GET
               filters:
                 - name: CircuitBreaker
                   args:
-                    name: geoEventCircuitBreaker
-                    fallbackUri: forward:/fallback/geoevent
+                    name: geoFenceCircuitBreaker
+                    fallbackUri: forward:/fallback/geofences
                 - name: Retry
                   args:
                     retries: 2
@@ -51,39 +85,39 @@ spring:
                 - AddResponseHeader=X-Gateway-Response, UMAS-Gateway
 
             - id: geoevent-by-id
-              uri: ${GEOEVENT_SERVICE}
+              uri: ${GEOFENCE_SERVICE}
               predicates:
                 - Path=/api/v1/geofences/{id}
                 - Method=GET
               filters:
                 - name: CircuitBreaker
                   args:
-                    name: geoEventCircuitBreaker
-                    fallbackUri: forward:/fallback/geoevent
+                    name: geoFenceCircuitBreaker
+                    fallbackUri: forward:/fallback/geofences
                 - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
 
             - id: geoevent-geojson
-              uri: ${GEOEVENT_SERVICE}
+              uri: ${GEOFENCE_SERVICE}
               predicates:
                 - Path=/api/v1/geofences/{id}/geojson
                 - Method=GET
               filters:
                 - name: CircuitBreaker
                   args:
-                    name: geoEventCircuitBreaker
-                    fallbackUri: forward:/fallback/geoevent
+                    name: geoFenceCircuitBreaker
+                    fallbackUri: forward:/fallback/geofences
                 - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
 
             - id: geoevent-check
-              uri: ${GEOEVENT_SERVICE}
+              uri: ${GEOFENCE_SERVICE}
               predicates:
                 - Path=/api/v1/geofences/check
                 - Method=GET
               filters:
                 - name: CircuitBreaker
                   args:
-                    name: geoEventCircuitBreaker
-                    fallbackUri: forward:/fallback/geoevent
+                    name: geoFenceCircuitBreaker
+                    fallbackUri: forward:/fallback/geofences
                 - name: RequestRateLimiter
                   args:
                     redis-rate-limiter.replenishRate: 50
@@ -112,6 +146,7 @@ spring:
                       basedOnPreviousValue: true
                 - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
                 - AddResponseHeader=X-Gateway-Response, UMAS-Gateway
+
           discovery:
             locator:
               enabled: false
@@ -120,7 +155,7 @@ spring:
 resilience4j:
   circuitbreaker:
     instances:
-      geoEventCircuitBreaker:
+      geoFenceCircuitBreaker:
         registerHealthIndicator: true
         slidingWindowSize: 10
         minimumNumberOfCalls: 5
@@ -136,7 +171,7 @@ resilience4j:
 
   timelimiter:
     instances:
-      geoEventCircuitBreaker:
+      geoFenceCircuitBreaker:
         timeoutDuration: 5s
 
 management:

@@ -15,12 +15,12 @@ import java.util.Map;
 @RequestMapping("/fallback")
 public class FallbackController {
 
-    @GetMapping(value = "/geoevent", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/geofences", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
     public Mono<Map<String, Object>> geoEventFallback() {
         return Mono.just(Map.of(
                 "error", "Service Unavailable",
-                "service", "GeoEvent Service",
+                "service", "Geofence Service",
                 "message", "El servicio de geocercas no está disponible temporalmente",
                 "timestamp", Instant.now().toString()
         ));
