@@ -84,6 +84,28 @@ spring:
                 - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
                 - AddResponseHeader=X-Gateway-Response, UMAS-Gateway
 
+            - id: geofences-upload
+              uri: ${GEOFENCE_SERVICE}
+              predicates:
+                - Path=/api/v1/geofences/upload
+                - Method=POST
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: geoFenceCircuitBreaker
+                    fallbackUri: forward:/fallback/geofences
+                - name: Retry
+                  args:
+                    retries: 2
+                    statuses: BAD_GATEWAY,SERVICE_UNAVAILABLE
+                    backoff:
+                      firstBackoff: 100ms
+                      maxBackoff: 1000ms
+                      factor: 2
+                      basedOnPreviousValue: true
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+                - AddResponseHeader=X-Gateway-Response, UMAS-Gateway
+
             - id: geoevent-by-id
               uri: ${GEOFENCE_SERVICE}
               predicates:
