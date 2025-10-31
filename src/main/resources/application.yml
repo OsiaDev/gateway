@@ -147,6 +147,18 @@ spring:
                     redis-rate-limiter.requestedTokens: 1
                 - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
 
+            - id: geofences-delete
+              uri: ${GEOFENCE_SERVICE}
+              predicates:
+                - Path=/api/v1/geofences/{id}
+                - Method=DELETE
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: geoFenceCircuitBreaker
+                    fallbackUri: forward:/fallback/geofences
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+
             - id: drones-all
               uri: ${RESOURCE_SERVICE}
               predicates:
