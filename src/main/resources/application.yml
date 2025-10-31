@@ -147,6 +147,18 @@ spring:
                     redis-rate-limiter.requestedTokens: 1
                 - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
 
+            - id: geofences-delete
+              uri: ${GEOFENCE_SERVICE}
+              predicates:
+                - Path=/api/v1/geofences/{id}
+                - Method=DELETE
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: geoFenceCircuitBreaker
+                    fallbackUri: forward:/fallback/geofences
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+
             - id: drones-all
               uri: ${RESOURCE_SERVICE}
               predicates:
@@ -168,6 +180,245 @@ spring:
                       basedOnPreviousValue: true
                 - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
                 - AddResponseHeader=X-Gateway-Response, UMAS-Gateway
+
+            - id: drones-statuses
+              uri: ${RESOURCE_SERVICE}
+              predicates:
+                - Path=/api/v1/drones/statuses
+                - Method=GET
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: droneCircuitBreaker
+                    fallbackUri: forward:/fallback/drones
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+                - AddResponseHeader=X-Gateway-Response, UMAS-Gateway
+
+            - id: drones-by-id
+              uri: ${RESOURCE_SERVICE}
+              predicates:
+                - Path=/api/v1/drones/{id}
+                - Method=GET
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: droneCircuitBreaker
+                    fallbackUri: forward:/fallback/drones
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+
+            - id: drones-create
+              uri: ${RESOURCE_SERVICE}
+              predicates:
+                - Path=/api/v1/drones
+                - Method=POST
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: droneCircuitBreaker
+                    fallbackUri: forward:/fallback/drones
+                - name: Retry
+                  args:
+                    retries: 1
+                    statuses: BAD_GATEWAY,SERVICE_UNAVAILABLE
+                    backoff:
+                      firstBackoff: 100ms
+                      maxBackoff: 500ms
+                      factor: 2
+                      basedOnPreviousValue: true
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+                - AddResponseHeader=X-Gateway-Response, UMAS-Gateway
+
+            - id: drones-update
+              uri: ${RESOURCE_SERVICE}
+              predicates:
+                - Path=/api/v1/drones/{id}
+                - Method=PUT
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: droneCircuitBreaker
+                    fallbackUri: forward:/fallback/drones
+                - name: Retry
+                  args:
+                    retries: 1
+                    statuses: BAD_GATEWAY,SERVICE_UNAVAILABLE
+                    backoff:
+                      firstBackoff: 100ms
+                      maxBackoff: 500ms
+                      factor: 2
+                      basedOnPreviousValue: true
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+
+            - id: drones-update-status
+              uri: ${RESOURCE_SERVICE}
+              predicates:
+                - Path=/api/v1/drones/{id}/status
+                - Method=PATCH
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: droneCircuitBreaker
+                    fallbackUri: forward:/fallback/drones
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+
+            - id: drones-delete
+              uri: ${RESOURCE_SERVICE}
+              predicates:
+                - Path=/api/v1/drones/{id}
+                - Method=DELETE
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: droneCircuitBreaker
+                    fallbackUri: forward:/fallback/drones
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+
+            - id: routes-all
+              uri: ${GEOFENCE_SERVICE}
+              predicates:
+                - Path=/api/v1/routes
+                - Method=GET
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: geoFenceCircuitBreaker
+                    fallbackUri: forward:/fallback/routes
+                - name: Retry
+                  args:
+                    retries: 2
+                    statuses: BAD_GATEWAY,SERVICE_UNAVAILABLE
+                    backoff:
+                      firstBackoff: 100ms
+                      maxBackoff: 1000ms
+                      factor: 2
+                      basedOnPreviousValue: true
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+                - AddResponseHeader=X-Gateway-Response, UMAS-Gateway
+
+            - id: routes-upload
+              uri: ${GEOFENCE_SERVICE}
+              predicates:
+                - Path=/api/v1/routes/upload
+                - Method=POST
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: geoFenceCircuitBreaker
+                    fallbackUri: forward:/fallback/routes
+                - name: Retry
+                  args:
+                    retries: 1
+                    statuses: BAD_GATEWAY,SERVICE_UNAVAILABLE
+                    backoff:
+                      firstBackoff: 100ms
+                      maxBackoff: 500ms
+                      factor: 2
+                      basedOnPreviousValue: true
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+                - AddResponseHeader=X-Gateway-Response, UMAS-Gateway
+
+            - id: routes-create
+              uri: ${GEOFENCE_SERVICE}
+              predicates:
+                - Path=/api/v1/routes
+                - Method=POST
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: geoFenceCircuitBreaker
+                    fallbackUri: forward:/fallback/routes
+                - name: Retry
+                  args:
+                    retries: 1
+                    statuses: BAD_GATEWAY,SERVICE_UNAVAILABLE
+                    backoff:
+                      firstBackoff: 100ms
+                      maxBackoff: 500ms
+                      factor: 2
+                      basedOnPreviousValue: true
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+                - AddResponseHeader=X-Gateway-Response, UMAS-Gateway
+
+            - id: routes-by-id
+              uri: ${GEOFENCE_SERVICE}
+              predicates:
+                - Path=/api/v1/routes/{id}
+                - Method=GET
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: geoFenceCircuitBreaker
+                    fallbackUri: forward:/fallback/routes
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+
+            - id: routes-by-name
+              uri: ${GEOFENCE_SERVICE}
+              predicates:
+                - Path=/api/v1/routes/by-name/{name}
+                - Method=GET
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: geoFenceCircuitBreaker
+                    fallbackUri: forward:/fallback/routes
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+
+            - id: routes-update
+              uri: ${GEOFENCE_SERVICE}
+              predicates:
+                - Path=/api/v1/routes/{id}
+                - Method=PUT
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: geoFenceCircuitBreaker
+                    fallbackUri: forward:/fallback/routes
+                - name: Retry
+                  args:
+                    retries: 1
+                    statuses: BAD_GATEWAY,SERVICE_UNAVAILABLE
+                    backoff:
+                      firstBackoff: 100ms
+                      maxBackoff: 500ms
+                      factor: 2
+                      basedOnPreviousValue: true
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+
+            - id: routes-activate
+              uri: ${GEOFENCE_SERVICE}
+              predicates:
+                - Path=/api/v1/routes/{id}/activate
+                - Method=PATCH
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: geoFenceCircuitBreaker
+                    fallbackUri: forward:/fallback/routes
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+
+            - id: routes-deactivate
+              uri: ${GEOFENCE_SERVICE}
+              predicates:
+                - Path=/api/v1/routes/{id}/deactivate
+                - Method=PATCH
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: geoFenceCircuitBreaker
+                    fallbackUri: forward:/fallback/routes
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+
+            - id: routes-delete
+              uri: ${GEOFENCE_SERVICE}
+              predicates:
+                - Path=/api/v1/routes/{id}
+                - Method=DELETE
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: geoFenceCircuitBreaker
+                    fallbackUri: forward:/fallback/routes
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
 
           discovery:
             locator:
@@ -191,9 +442,26 @@ resilience4j:
           - java.io.IOException
           - java.util.concurrent.TimeoutException
 
+      droneCircuitBreaker:
+        registerHealthIndicator: true
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 10s
+        failureRateThreshold: 50
+        eventConsumerBufferSize: 10
+        recordExceptions:
+          - org.springframework.web.client.HttpServerErrorException
+          - java.io.IOException
+          - java.util.concurrent.TimeoutException
+
   timelimiter:
     instances:
       geoFenceCircuitBreaker:
+        timeoutDuration: 5s
+
+      droneCircuitBreaker:
         timeoutDuration: 5s
 
 management:
