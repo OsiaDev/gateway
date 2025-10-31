@@ -37,4 +37,15 @@ public class FallbackController {
         ));
     }
 
+    @GetMapping(value = "/routes", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
+    public Mono<Map<String, Object>> routesFallback() {
+        return Mono.just(Map.of(
+                "error", "Service Unavailable",
+                "service", "Route Service",
+                "message", "El servicio de rutas no está disponible temporalmente",
+                "timestamp", Instant.now().toString()
+        ));
+    }
+
 }

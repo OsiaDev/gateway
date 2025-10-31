@@ -273,6 +273,158 @@ spring:
                     fallbackUri: forward:/fallback/drones
                 - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
 
+            - id: routes-all
+              uri: ${GEOFENCE_SERVICE}
+              predicates:
+                - Path=/api/v1/routes
+                - Method=GET
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: geoFenceCircuitBreaker
+                    fallbackUri: forward:/fallback/routes
+                - name: Retry
+                  args:
+                    retries: 2
+                    statuses: BAD_GATEWAY,SERVICE_UNAVAILABLE
+                    backoff:
+                      firstBackoff: 100ms
+                      maxBackoff: 1000ms
+                      factor: 2
+                      basedOnPreviousValue: true
+                - name: RequestRateLimiter
+                  args:
+                    redis-rate-limiter.replenishRate: 50
+                    redis-rate-limiter.burstCapacity: 100
+                    redis-rate-limiter.requestedTokens: 1
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+                - AddResponseHeader=X-Gateway-Response, UMAS-Gateway
+
+            - id: routes-upload
+              uri: ${GEOFENCE_SERVICE}
+              predicates:
+                - Path=/api/v1/routes/upload
+                - Method=POST
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: geoFenceCircuitBreaker
+                    fallbackUri: forward:/fallback/routes
+                - name: Retry
+                  args:
+                    retries: 1
+                    statuses: BAD_GATEWAY,SERVICE_UNAVAILABLE
+                    backoff:
+                      firstBackoff: 100ms
+                      maxBackoff: 500ms
+                      factor: 2
+                      basedOnPreviousValue: true
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+                - AddResponseHeader=X-Gateway-Response, UMAS-Gateway
+
+            - id: routes-create
+              uri: ${GEOFENCE_SERVICE}
+              predicates:
+                - Path=/api/v1/routes
+                - Method=POST
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: geoFenceCircuitBreaker
+                    fallbackUri: forward:/fallback/routes
+                - name: Retry
+                  args:
+                    retries: 1
+                    statuses: BAD_GATEWAY,SERVICE_UNAVAILABLE
+                    backoff:
+                      firstBackoff: 100ms
+                      maxBackoff: 500ms
+                      factor: 2
+                      basedOnPreviousValue: true
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+                - AddResponseHeader=X-Gateway-Response, UMAS-Gateway
+
+            - id: routes-by-id
+              uri: ${GEOFENCE_SERVICE}
+              predicates:
+                - Path=/api/v1/routes/{id}
+                - Method=GET
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: geoFenceCircuitBreaker
+                    fallbackUri: forward:/fallback/routes
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+
+            - id: routes-by-name
+              uri: ${GEOFENCE_SERVICE}
+              predicates:
+                - Path=/api/v1/routes/by-name/{name}
+                - Method=GET
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: geoFenceCircuitBreaker
+                    fallbackUri: forward:/fallback/routes
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+
+            - id: routes-update
+              uri: ${GEOFENCE_SERVICE}
+              predicates:
+                - Path=/api/v1/routes/{id}
+                - Method=PUT
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: geoFenceCircuitBreaker
+                    fallbackUri: forward:/fallback/routes
+                - name: Retry
+                  args:
+                    retries: 1
+                    statuses: BAD_GATEWAY,SERVICE_UNAVAILABLE
+                    backoff:
+                      firstBackoff: 100ms
+                      maxBackoff: 500ms
+                      factor: 2
+                      basedOnPreviousValue: true
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+
+            - id: routes-activate
+              uri: ${GEOFENCE_SERVICE}
+              predicates:
+                - Path=/api/v1/routes/{id}/activate
+                - Method=PATCH
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: geoFenceCircuitBreaker
+                    fallbackUri: forward:/fallback/routes
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+
+            - id: routes-deactivate
+              uri: ${GEOFENCE_SERVICE}
+              predicates:
+                - Path=/api/v1/routes/{id}/deactivate
+                - Method=PATCH
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: geoFenceCircuitBreaker
+                    fallbackUri: forward:/fallback/routes
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+
+            - id: routes-delete
+              uri: ${GEOFENCE_SERVICE}
+              predicates:
+                - Path=/api/v1/routes/{id}
+                - Method=DELETE
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: geoFenceCircuitBreaker
+                    fallbackUri: forward:/fallback/routes
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+
           discovery:
             locator:
               enabled: false
