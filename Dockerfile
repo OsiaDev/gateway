@@ -2,7 +2,7 @@
 # Java 21 + Spring Boot + Gradle (usa gradlew si existe)
 
 # -------- Stage 1: Build --------
-FROM gradle:8.5-jdk21-alpine AS builder
+FROM gradle:8.5-jdk21 AS builder
 WORKDIR /app
 
 # Copiar todo el contexto (incluye gradlew, gradle/, build.gradle.kts, src/, etc.)
@@ -16,7 +16,7 @@ RUN if [ -f ./gradlew ]; then \
     fi
 
 # -------- Stage 2: Runtime --------
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:21-jre
 LABEL maintainer="CETAD UMAS Team"
 LABEL description="UMAS Gateway Service - Hexagonal Architecture with Kafka and UgCS"
 LABEL version="0.0.1-SNAPSHOT"
@@ -27,10 +27,12 @@ ENV JAVA_OPTS="-Xmx512m -Xms256m" \
     APP_USER=umas \
     APP_GROUP=umas
 
-# Instalar curl para healthcheck y crear usuario no-root
-RUN apk add --no-cache curl \
- && addgroup -S ${APP_GROUP} \
- && adduser -S ${APP_USER} -G ${APP_GROUP}
+# Instalar curl para healthcheck y crear usuario no-root (Debian/Ubuntu base)
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends curl ca-certificates \
+ && rm -rf /var/lib/apt/lists/* \
+ && groupadd -r ${APP_GROUP} \
+ && useradd -r -g ${APP_GROUP} ${APP_USER}
 
 WORKDIR /app
 
@@ -38,7 +40,7 @@ WORKDIR /app
 COPY --from=builder /app/build/libs/*.jar /app/app.jar
 
 # Fail early: asegurar que el jar exista en la imagen
-RUN [ -f /app/app.jar ]
+RUN test -f /app/app.jar
 
 # Asignar ownership antes de cambiar a user no-root
 RUN chown -R ${APP_USER}:${APP_GROUP} /app
