@@ -273,6 +273,95 @@ spring:
                     fallbackUri: forward:/fallback/drones
                 - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
 
+            - id: operators-all
+              uri: ${RESOURCE_SERVICE}
+              predicates:
+                - Path=/api/v1/operators
+                - Method=GET
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: operatorCircuitBreaker
+                    fallbackUri: forward:/fallback/operators
+                - name: Retry
+                  args:
+                    retries: 2
+                    statuses: BAD_GATEWAY,SERVICE_UNAVAILABLE
+                    backoff:
+                      firstBackoff: 100ms
+                      maxBackoff: 1000ms
+                      factor: 2
+                      basedOnPreviousValue: true
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+                - AddResponseHeader=X-Gateway-Response, UMAS-Gateway
+
+            - id: operators-by-id
+              uri: ${RESOURCE_SERVICE}
+              predicates:
+                - Path=/api/v1/operators/{id}
+                - Method=GET
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: operatorCircuitBreaker
+                    fallbackUri: forward:/fallback/operators
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+
+            - id: operators-create
+              uri: ${RESOURCE_SERVICE}
+              predicates:
+                - Path=/api/v1/operators
+                - Method=POST
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: operatorCircuitBreaker
+                    fallbackUri: forward:/fallback/operators
+                - name: Retry
+                  args:
+                    retries: 1
+                    statuses: BAD_GATEWAY,SERVICE_UNAVAILABLE
+                    backoff:
+                      firstBackoff: 100ms
+                      maxBackoff: 500ms
+                      factor: 2
+                      basedOnPreviousValue: true
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+                - AddResponseHeader=X-Gateway-Response, UMAS-Gateway
+
+            - id: operators-update
+              uri: ${RESOURCE_SERVICE}
+              predicates:
+                - Path=/api/v1/operators/{id}
+                - Method=PUT
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: operatorCircuitBreaker
+                    fallbackUri: forward:/fallback/operators
+                - name: Retry
+                  args:
+                    retries: 1
+                    statuses: BAD_GATEWAY,SERVICE_UNAVAILABLE
+                    backoff:
+                      firstBackoff: 100ms
+                      maxBackoff: 500ms
+                      factor: 2
+                      basedOnPreviousValue: true
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+
+            - id: operators-delete
+              uri: ${RESOURCE_SERVICE}
+              predicates:
+                - Path=/api/v1/operators/{id}
+                - Method=DELETE
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: operatorCircuitBreaker
+                    fallbackUri: forward:/fallback/operators
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+
             - id: routes-all
               uri: ${GEOFENCE_SERVICE}
               predicates:
@@ -420,6 +509,160 @@ spring:
                     fallbackUri: forward:/fallback/routes
                 - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
 
+            - id: missions-health
+              uri: ${OPERATION_SERVICE}
+              predicates:
+                - Path=/api/v1/missions/health
+                - Method=GET
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: missionCircuitBreaker
+                    fallbackUri: forward:/fallback/missions
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+
+            - id: missions-authorized
+              uri: ${OPERATION_SERVICE}
+              predicates:
+                - Path=/api/v1/missions/authorized
+                - Method=GET
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: missionCircuitBreaker
+                    fallbackUri: forward:/fallback/missions
+                - name: Retry
+                  args:
+                    retries: 2
+                    statuses: BAD_GATEWAY,SERVICE_UNAVAILABLE
+                    backoff:
+                      firstBackoff: 100ms
+                      maxBackoff: 1000ms
+                      factor: 2
+                      basedOnPreviousValue: true
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+                - AddResponseHeader=X-Gateway-Response, UMAS-Gateway
+
+            - id: missions-unauthorized
+              uri: ${OPERATION_SERVICE}
+              predicates:
+                - Path=/api/v1/missions/unauthorized
+                - Method=GET
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: missionCircuitBreaker
+                    fallbackUri: forward:/fallback/missions
+                - name: Retry
+                  args:
+                    retries: 2
+                    statuses: BAD_GATEWAY,SERVICE_UNAVAILABLE
+                    backoff:
+                      firstBackoff: 100ms
+                      maxBackoff: 1000ms
+                      factor: 2
+                      basedOnPreviousValue: true
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+                - AddResponseHeader=X-Gateway-Response, UMAS-Gateway
+
+            - id: missions-all
+              uri: ${OPERATION_SERVICE}
+              predicates:
+                - Path=/api/v1/missions
+                - Method=GET
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: missionCircuitBreaker
+                    fallbackUri: forward:/fallback/missions
+                - name: Retry
+                  args:
+                    retries: 2
+                    statuses: BAD_GATEWAY,SERVICE_UNAVAILABLE
+                    backoff:
+                      firstBackoff: 100ms
+                      maxBackoff: 1000ms
+                      factor: 2
+                      basedOnPreviousValue: true
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+                - AddResponseHeader=X-Gateway-Response, UMAS-Gateway
+
+            - id: missions-by-id
+              uri: ${OPERATION_SERVICE}
+              predicates:
+                - Path=/api/v1/missions/{id}
+                - Method=GET
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: missionCircuitBreaker
+                    fallbackUri: forward:/fallback/missions
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+
+            - id: missions-create
+              uri: ${OPERATION_SERVICE}
+              predicates:
+                - Path=/api/v1/missions
+                - Method=POST
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: missionCircuitBreaker
+                    fallbackUri: forward:/fallback/missions
+                - name: Retry
+                  args:
+                    retries: 1
+                    statuses: BAD_GATEWAY,SERVICE_UNAVAILABLE
+                    backoff:
+                      firstBackoff: 100ms
+                      maxBackoff: 500ms
+                      factor: 2
+                      basedOnPreviousValue: true
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+                - AddResponseHeader=X-Gateway-Response, UMAS-Gateway
+
+            - id: missions-approve
+              uri: ${OPERATION_SERVICE}
+              predicates:
+                - Path=/api/v1/missions/approve/{id}
+                - Method=POST
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: missionCircuitBreaker
+                    fallbackUri: forward:/fallback/missions
+                - name: Retry
+                  args:
+                    retries: 1
+                    statuses: BAD_GATEWAY,SERVICE_UNAVAILABLE
+                    backoff:
+                      firstBackoff: 100ms
+                      maxBackoff: 500ms
+                      factor: 2
+                      basedOnPreviousValue: true
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+
+            - id: missions-execute
+              uri: ${OPERATION_SERVICE}
+              predicates:
+                - Path=/api/v1/missions/execute/{id}
+                - Method=POST
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: missionCircuitBreaker
+                    fallbackUri: forward:/fallback/missions
+                - name: Retry
+                  args:
+                    retries: 1
+                    statuses: BAD_GATEWAY,SERVICE_UNAVAILABLE
+                    backoff:
+                      firstBackoff: 100ms
+                      maxBackoff: 500ms
+                      factor: 2
+                      basedOnPreviousValue: true
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+
           discovery:
             locator:
               enabled: false
@@ -456,12 +699,46 @@ resilience4j:
           - java.io.IOException
           - java.util.concurrent.TimeoutException
 
+      missionCircuitBreaker:
+        registerHealthIndicator: true
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 10s
+        failureRateThreshold: 50
+        eventConsumerBufferSize: 10
+        recordExceptions:
+          - org.springframework.web.client.HttpServerErrorException
+          - java.io.IOException
+          - java.util.concurrent.TimeoutException
+
+      operatorCircuitBreaker:
+        registerHealthIndicator: true
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 10s
+        failureRateThreshold: 50
+        eventConsumerBufferSize: 10
+        recordExceptions:
+          - org.springframework.web.client.HttpServerErrorException
+          - java.io.IOException
+          - java.util.concurrent.TimeoutException
+
   timelimiter:
     instances:
       geoFenceCircuitBreaker:
         timeoutDuration: 5s
 
       droneCircuitBreaker:
+        timeoutDuration: 5s
+
+      missionCircuitBreaker:
+        timeoutDuration: 5s
+
+      operatorCircuitBreaker:
         timeoutDuration: 5s
 
 management:
