@@ -13,7 +13,10 @@ spring:
           globalcors:
             cors-configurations:
               '[/**]':
-                allowedOrigins: "*"
+                allowedOrigins:
+                  - "http://localhost:3000"
+                  - "http://192.168.246.10:3000"
+                  - "http://127.0.0.1:3000"
                 allowedMethods:
                   - GET
                   - POST
@@ -22,6 +25,7 @@ spring:
                   - PATCH
                   - OPTIONS
                 allowedHeaders: "*"
+                allowCredentials: true
                 exposedHeaders:
                   - Content-Type
                   - Authorization
