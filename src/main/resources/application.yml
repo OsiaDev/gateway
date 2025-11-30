@@ -667,6 +667,64 @@ spring:
                       basedOnPreviousValue: true
                 - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
 
+            # Telemetry routes (note: operation service uses /api/telemetry without v1)
+            - id: telemetry-vehicle-range
+              uri: ${OPERATION_SERVICE}
+              predicates:
+                - Path=/api/telemetry/vehicle/{vehicleId}/range
+                - Method=GET
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: missionCircuitBreaker
+                    fallbackUri: forward:/fallback/telemetry
+                - name: Retry
+                  args:
+                    retries: 2
+                    statuses: BAD_GATEWAY,SERVICE_UNAVAILABLE
+                    backoff:
+                      firstBackoff: 100ms
+                      maxBackoff: 1000ms
+                      factor: 2
+                      basedOnPreviousValue: true
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+                - AddResponseHeader=X-Gateway-Response, UMAS-Gateway
+
+            - id: telemetry-vehicle-latest
+              uri: ${OPERATION_SERVICE}
+              predicates:
+                - Path=/api/telemetry/vehicle/{vehicleId}/latest
+                - Method=GET
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: missionCircuitBreaker
+                    fallbackUri: forward:/fallback/telemetry
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+                - AddResponseHeader=X-Gateway-Response, UMAS-Gateway
+
+            - id: telemetry-mission-range
+              uri: ${OPERATION_SERVICE}
+              predicates:
+                - Path=/api/telemetry/mission/{missionId}/range
+                - Method=GET
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: missionCircuitBreaker
+                    fallbackUri: forward:/fallback/telemetry
+                - name: Retry
+                  args:
+                    retries: 2
+                    statuses: BAD_GATEWAY,SERVICE_UNAVAILABLE
+                    backoff:
+                      firstBackoff: 100ms
+                      maxBackoff: 1000ms
+                      factor: 2
+                      basedOnPreviousValue: true
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+                - AddResponseHeader=X-Gateway-Response, UMAS-Gateway
+
           discovery:
             locator:
               enabled: false
