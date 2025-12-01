@@ -48,4 +48,14 @@ public class FallbackController {
         ));
     }
 
+    @GetMapping(value = "/missions", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
+    public Mono<Map<String, Object>> missionFallback() {
+        return Mono.just(Map.of(
+                "error", "Service Unavailable",
+                "service", "Mission Service",
+                "message", "El servicio de misiones no está disponible temporalmente",
+                "timestamp", Instant.now().toString()
+        ));
+    }
 }
