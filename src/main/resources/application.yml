@@ -663,6 +663,48 @@ spring:
                       basedOnPreviousValue: true
                 - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
 
+            - id: return-to-home-execute
+              uri: ${OPERATION_SERVICE}
+              predicates:
+                - Path=/api/v1/commands/{missionId}/return-to-home
+                - Method=POST
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: missionCircuitBreaker
+                    fallbackUri: forward:/fallback/missions
+                - name: Retry
+                  args:
+                    retries: 1
+                    statuses: BAD_GATEWAY,SERVICE_UNAVAILABLE
+                    backoff:
+                      firstBackoff: 100ms
+                      maxBackoff: 500ms
+                      factor: 2
+                      basedOnPreviousValue: true
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+
+            - id: land-execute
+              uri: ${OPERATION_SERVICE}
+              predicates:
+                - Path=/api/v1/commands/{missionId}/land
+                - Method=POST
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: missionCircuitBreaker
+                    fallbackUri: forward:/fallback/missions
+                - name: Retry
+                  args:
+                    retries: 1
+                    statuses: BAD_GATEWAY,SERVICE_UNAVAILABLE
+                    backoff:
+                      firstBackoff: 100ms
+                      maxBackoff: 500ms
+                      factor: 2
+                      basedOnPreviousValue: true
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+
           discovery:
             locator:
               enabled: false
