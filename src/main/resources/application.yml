@@ -591,40 +591,6 @@ spring:
                 - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
                 - AddResponseHeader=X-Gateway-Response, UMAS-Gateway
 
-            - id: missions-by-id
-              uri: ${OPERATION_SERVICE}
-              predicates:
-                - Path=/api/v1/missions/{id}
-                - Method=GET
-              filters:
-                - name: CircuitBreaker
-                  args:
-                    name: missionCircuitBreaker
-                    fallbackUri: forward:/fallback/missions
-                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
-
-            - id: missions-create
-              uri: ${OPERATION_SERVICE}
-              predicates:
-                - Path=/api/v1/missions
-                - Method=POST
-              filters:
-                - name: CircuitBreaker
-                  args:
-                    name: missionCircuitBreaker
-                    fallbackUri: forward:/fallback/missions
-                - name: Retry
-                  args:
-                    retries: 1
-                    statuses: BAD_GATEWAY,SERVICE_UNAVAILABLE
-                    backoff:
-                      firstBackoff: 100ms
-                      maxBackoff: 500ms
-                      factor: 2
-                      basedOnPreviousValue: true
-                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
-                - AddResponseHeader=X-Gateway-Response, UMAS-Gateway
-
             - id: missions-approve
               uri: ${OPERATION_SERVICE}
               predicates:
@@ -667,6 +633,40 @@ spring:
                       basedOnPreviousValue: true
                 - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
 
+            - id: missions-by-id
+              uri: ${OPERATION_SERVICE}
+              predicates:
+                - Path=/api/v1/missions/{id}
+                - Method=GET
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: missionCircuitBreaker
+                    fallbackUri: forward:/fallback/missions
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+
+            - id: missions-create
+              uri: ${OPERATION_SERVICE}
+              predicates:
+                - Path=/api/v1/missions
+                - Method=POST
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: missionCircuitBreaker
+                    fallbackUri: forward:/fallback/missions
+                - name: Retry
+                  args:
+                    retries: 1
+                    statuses: BAD_GATEWAY,SERVICE_UNAVAILABLE
+                    backoff:
+                      firstBackoff: 100ms
+                      maxBackoff: 500ms
+                      factor: 2
+                      basedOnPreviousValue: true
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+                - AddResponseHeader=X-Gateway-Response, UMAS-Gateway
+
             - id: return-to-home-execute
               uri: ${OPERATION_SERVICE}
               predicates:
@@ -707,6 +707,72 @@ spring:
                       maxBackoff: 500ms
                       factor: 2
                       basedOnPreviousValue: true
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+
+            # ===== TELEMETRY ROUTES =====
+            - id: telemetry-by-id
+              uri: ${OPERATION_SERVICE}
+              predicates:
+                - Path=/api/telemetry/{id}
+                - Method=GET
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: telemetryCircuitBreaker
+                    fallbackUri: forward:/fallback/telemetry
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+
+            - id: telemetry-vehicle-latest
+              uri: ${OPERATION_SERVICE}
+              predicates:
+                - Path=/api/telemetry/vehicle/{vehicleId}/latest
+                - Method=GET
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: telemetryCircuitBreaker
+                    fallbackUri: forward:/fallback/telemetry
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+
+            - id: telemetry-vehicle-range
+              uri: ${OPERATION_SERVICE}
+              predicates:
+                - Path=/api/telemetry/vehicle/{vehicleId}/range
+                - Method=GET
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: telemetryCircuitBreaker
+                    fallbackUri: forward:/fallback/telemetry
+                - name: Retry
+                  args:
+                    retries: 2
+                    statuses: BAD_GATEWAY,SERVICE_UNAVAILABLE
+                    backoff:
+                      firstBackoff: 100ms
+                      maxBackoff: 1000ms
+                      factor: 2
+                      basedOnPreviousValue: true
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+
+            - id: telemetry-vehicle-recent
+              uri: ${OPERATION_SERVICE}
+              predicates:
+                - Path=/api/telemetry/vehicle/{vehicleId}/recent
+                - Method=GET
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: telemetryCircuitBreaker
+                    fallbackUri: forward:/fallback/telemetry
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+
+            - id: telemetry-health
+              uri: ${OPERATION_SERVICE}
+              predicates:
+                - Path=/api/telemetry/health
+                - Method=GET
+              filters:
                 - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
 
           discovery:
@@ -773,6 +839,20 @@ resilience4j:
           - java.io.IOException
           - java.util.concurrent.TimeoutException
 
+      telemetryCircuitBreaker:
+        registerHealthIndicator: true
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 10s
+        failureRateThreshold: 50
+        eventConsumerBufferSize: 10
+        recordExceptions:
+          - org.springframework.web.client.HttpServerErrorException
+          - java.io.IOException
+          - java.util.concurrent.TimeoutException
+
   timelimiter:
     instances:
       geoFenceCircuitBreaker:
@@ -786,6 +866,9 @@ resilience4j:
 
       operatorCircuitBreaker:
         timeoutDuration: 5s
+
+      telemetryCircuitBreaker:
+        timeoutDuration: 10s
 
 management:
   endpoints:
