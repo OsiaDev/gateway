@@ -1,15 +1,16 @@
 package co.cetad.umas.gateway.infrastructure.web;
 
+import java.time.Instant;
+import java.util.Map;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.Mono;
 
-import java.time.Instant;
-import java.util.Map;
+import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/fallback")
@@ -55,6 +56,17 @@ public class FallbackController {
                 "error", "Service Unavailable",
                 "service", "Mission Service",
                 "message", "El servicio de misiones no está disponible temporalmente",
+                "timestamp", Instant.now().toString()
+        ));
+    }
+
+    @GetMapping(value = "/adconnect", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
+    public Mono<Map<String, Object>> adConnectFallback() {
+        return Mono.just(Map.of(
+                "error", "Service Unavailable",
+                "service", "AD Connect Service",
+                "message", "El servicio de AD Connect no está disponible temporalmente",
                 "timestamp", Instant.now().toString()
         ));
     }
