@@ -5,6 +5,12 @@ spring:
   application:
     name: umas-gateway-service
 
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://192.168.246.10/realms/umas}
+          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://192.168.246.10/realms/umas/protocol/openid-connect/certs}
 
   cloud:
     gateway:
@@ -775,6 +781,74 @@ spring:
               filters:
                 - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
 
+            # ========== AD CONNECT SERVICE ROUTES ==========
+            - id: adconnect-ad-users
+              uri: ${ADCONNECT_SERVICE:http://192.168.246.10:1130}
+              predicates:
+                - Path=/adconnect/api/v1/ad_users/**
+              filters:
+                - StripPrefix=1
+                - name: CircuitBreaker
+                  args:
+                    name: adConnectCircuitBreaker
+                    fallbackUri: forward:/fallback/adconnect
+                - name: Retry
+                  args:
+                    retries: 2
+                    statuses: BAD_GATEWAY,SERVICE_UNAVAILABLE
+                    backoff:
+                      firstBackoff: 100ms
+                      maxBackoff: 1000ms
+                      factor: 2
+                      basedOnPreviousValue: true
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+                - AddResponseHeader=X-Gateway-Response, UMAS-Gateway
+
+            - id: adconnect-users
+              uri: ${ADCONNECT_SERVICE:http://192.168.246.10:1130}
+              predicates:
+                - Path=/adconnect/api/v1/users/**
+              filters:
+                - StripPrefix=1
+                - name: CircuitBreaker
+                  args:
+                    name: adConnectCircuitBreaker
+                    fallbackUri: forward:/fallback/adconnect
+                - name: Retry
+                  args:
+                    retries: 2
+                    statuses: BAD_GATEWAY,SERVICE_UNAVAILABLE
+                    backoff:
+                      firstBackoff: 100ms
+                      maxBackoff: 1000ms
+                      factor: 2
+                      basedOnPreviousValue: true
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+
+            - id: adconnect-roles
+              uri: ${ADCONNECT_SERVICE:http://192.168.246.10:1130}
+              predicates:
+                - Path=/adconnect/api/v1/roles/**
+              filters:
+                - StripPrefix=1
+                - name: CircuitBreaker
+                  args:
+                    name: adConnectCircuitBreaker
+                    fallbackUri: forward:/fallback/adconnect
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+
+            - id: adconnect-groups
+              uri: ${ADCONNECT_SERVICE:http://192.168.246.10:1130}
+              predicates:
+                - Path=/adconnect/api/v1/command_and_control_groups/**
+              filters:
+                - StripPrefix=1
+                - name: CircuitBreaker
+                  args:
+                    name: adConnectCircuitBreaker
+                    fallbackUri: forward:/fallback/adconnect
+                - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
+
           discovery:
             locator:
               enabled: false
@@ -853,6 +927,20 @@ resilience4j:
           - java.io.IOException
           - java.util.concurrent.TimeoutException
 
+      adConnectCircuitBreaker:
+        registerHealthIndicator: true
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 10s
+        failureRateThreshold: 50
+        eventConsumerBufferSize: 10
+        recordExceptions:
+          - org.springframework.web.client.HttpServerErrorException
+          - java.io.IOException
+          - java.util.concurrent.TimeoutException
+
   timelimiter:
     instances:
       geoFenceCircuitBreaker:
@@ -869,6 +957,9 @@ resilience4j:
 
       telemetryCircuitBreaker:
         timeoutDuration: 10s
+
+      adConnectCircuitBreaker:
+        timeoutDuration: 5s
 
 management:
   endpoints:
