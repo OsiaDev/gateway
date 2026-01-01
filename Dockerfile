@@ -8,6 +8,10 @@ WORKDIR /app
 # Copiar todo el contexto (incluye gradlew, gradle/, build.gradle.kts, src/, etc.)
 COPY . .
 
+# Configurar variables de entorno para optimizar memoria de Gradle
+# Aumentado a 3GB para builds complejos
+ENV GRADLE_OPTS="-Dorg.gradle.daemon=false -Dorg.gradle.jvmargs='-Xmx3g -XX:MaxMetaspaceSize=768m -XX:+UseG1GC -XX:+HeapDumpOnOutOfMemoryError'"
+
 # Ejecutar build con gradle wrapper si existe, si no usar gradle del image
 RUN if [ -f ./gradlew ]; then \
       chmod +x ./gradlew && ./gradlew clean bootJar -x test --no-daemon; \
@@ -21,7 +25,7 @@ LABEL maintainer="CETAD UMAS Team"
 LABEL description="UMAS Gateway Service - Hexagonal Architecture with Kafka and UgCS"
 LABEL version="0.0.1-SNAPSHOT"
 
-ENV JAVA_OPTS="-Xmx512m -Xms256m" \
+ENV JAVA_OPTS="-Xmx1G -Xms512m" \
     SPRING_PROFILES_ACTIVE=prod \
     TZ=America/Bogota \
     APP_USER=umas \
