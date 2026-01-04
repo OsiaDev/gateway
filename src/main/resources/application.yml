@@ -581,7 +581,7 @@ spring:
                 - Path=/api/v1/missions
                 - Method=GET
               filters:
-                - AddUserIdHeaderFilter
+                - AddUserIdHeader
                 - AddRequestHeader=X-Gateway-Request, UMAS-Gateway
                 - name: CircuitBreaker
                   args:
