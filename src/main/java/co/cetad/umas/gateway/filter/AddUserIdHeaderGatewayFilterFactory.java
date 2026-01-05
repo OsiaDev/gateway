@@ -31,7 +31,7 @@ public class AddUserIdHeaderGatewayFilterFactory
                         //jwt.getClaims().forEach((key, value) -> System.out.println(key + " : " + value));
 
                         // Extraer el ID del usuario del claim "sub" (ajusta según necesites)
-                        String userId = jwt.getClaimAsString("sub");
+                        String userId = jwt.getClaimAsString("preferred_username");
 
                         // Extraer roles de Keycloak
                         List<String> roles = extractRoles(jwt);
